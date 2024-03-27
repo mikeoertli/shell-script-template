@@ -1,7 +1,7 @@
 # Shell Script Template
 
 <p align="center">
-<img width="200" alt="Bash" src="images/bash-full.png"/>
+<img width="400" alt="Bash" src="images/bash-full.png"/>
 </p>
 
 This is the baseline Bash shell script template I use for new projects, from the simple to the complex.
