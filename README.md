@@ -7,7 +7,8 @@
 This is the baseline Bash shell script template I use for new projects, from the simple to the complex.
 
 A huge hat tip to the original foundation I used for this on [betterdev.blog](https://betterdev.blog/minimal-safe-bash-script-template/)
-([raw source](https://gist.github.com/m-radzikowski/53e0b39e9a59a1518990e76c2bff8038)).
+([raw source](https://gist.github.com/m-radzikowski/53e0b39e9a59a1518990e76c2bff8038)). Another blog resource I referenced and learned
+from was on [betterprogramming.pub](https://betterprogramming.pub/my-minimal-safe-bash-script-template-300759114040).
 
 This has been tested and used almost exclusively on macOS, but I don't _think_ there is anything specific to macOS built into the script,
 or at least not to the detriment of any other platforms.
