@@ -46,3 +46,12 @@ There is also some great discussion on the topic [on StackExchange](https://unix
 
 I highly recommend the [ShellCheck](https://github.com/koalaman/shellcheck) LINTing tool, it provides a lot of really useful feedback
 regarding problematic or error-prone aspects of a shell script.
+
+## Testing
+
+Unit testing for shell scripts is a wide-ranging topic with no shortage of available libraries. I have only just begun this research,
+but so far [this summary on Medium from wemake-services](https://medium.com/wemake-services/testing-bash-applications-85512e7fe2de)
+seems to have a nice concise outline of pros/cons of some common libraries. This [dodie/testing-in-bash](https://github.com/dodie/testing-in-bash)
+repo also contains a useful overview of feature support for popular libraries.
+
+I am inclined to use [`bats-core`](https://github.com/bats-core/bats-core), but I suspect there are several good choices.
