@@ -41,3 +41,8 @@ You will notice that `getopt` is not used, this is because of an [incompatibilit
 Colorized output uses 3 and 4-bit colors ([more info on Wikipedia](https://en.wikipedia.org/wiki/ANSI_escape_code#3-bit_and_4-bit)) and has
 only really been tested on very dark backgrounds. Where multiple variants of a color exist, I typically used the bright variant.
 There is also some great discussion on the topic [on StackExchange](https://unix.stackexchange.com/a/438357).
+
+### ShellCheck LINTing
+
+I highly recommend the [ShellCheck](https://github.com/koalaman/shellcheck) LINTing tool, it provides a lot of really useful feedback
+regarding problematic or error-prone aspects of a shell script.

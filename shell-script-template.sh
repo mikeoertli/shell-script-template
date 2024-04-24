@@ -4,6 +4,7 @@
 set -Eeuo pipefail
 trap cleanup SIGINT SIGTERM ERR EXIT
 
+# shellcheck disable=SC2034
 readonly script_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd -P)
 
 usage() {
@@ -48,11 +49,12 @@ setup_colors() {
   # Typically uses bright color variants.
   # About terminal colors/format: https://unix.stackexchange.com/a/438357
   # Uses 3 and 4-bit color codes: https://en.wikipedia.org/wiki/ANSI_escape_code#3-bit_and_4-bit
-  BOLD=$(tput bold)
-  NORMAL=$(tput sgr0)
-  DIM=$(tput sgr0 && tput dim)
-  UNDERLINE=$(tput smul)
-  BOLD_UL=$(tput bold)$(tput smul)
+  # Uncomment these if needed:
+  # BOLD=$(tput bold)
+  # NORMAL=$(tput sgr0)
+  # DIM=$(tput sgr0 && tput dim)
+  # UNDERLINE=$(tput smul)
+  # BOLD_UL=$(tput bold)$(tput smul)
   if [[ -t 2 ]] && [[ -z "${NO_COLOR-}" ]] && [[ "${TERM-}" != "dumb" ]]; then
     # \033 or \e is the escape character and coupled with the '[' makes the prefix used to specify color, 0; indicates normal (not bold/etc.), then a color code (see wiki)
 
@@ -67,6 +69,7 @@ setup_colors() {
     WHITE='\e[0;97m'
     GRAY='\e[0;90m'
   else
+    # shellcheck disable=SC2034
     NOFORMAT='' BLUE='' RED='' YELLOW='' ORANGE='' PINK='' CYAN='' GREEN='' WHITE='' GRAY=''
   fi
 }
@@ -91,7 +94,7 @@ is_not_silent_mode() {
 }
 
 is_debug_mode() {
-  [[ is_not_silent_mode ]] && [[ "${DEBUG-0}" -eq 1 ]]
+  is_not_silent_mode && [[ "${DEBUG-0}" -eq 1 ]]
 }
 
 msg() {
@@ -153,10 +156,15 @@ parse_params() {
 
   args=("$@")
 
-  is_debug_mode && dbg "Debug mode enabled" || msg "Not debug mode"
+  if is_debug_mode ; then
+    dbg "Debug mode enabled"
+  else
+    msg "Not debug mode"
+  fi
 
   # TODO: perform validation here and/or remove the following:
   [[ -z "${param-}" ]] && die "Missing required parameter: param"
+  [[ -z "${other-}" ]] && die "Missing required parameter: other"
   
   # This is only used if there are required args that aren't options/parameters
   # [[ ${#args[@]} -eq 0 ]] && die "Missing script arguments"
