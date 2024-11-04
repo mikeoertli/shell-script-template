@@ -55,7 +55,7 @@ setup_colors() {
   # DIM=$(tput sgr0 && tput dim)
   # UNDERLINE=$(tput smul)
   # BOLD_UL=$(tput bold)$(tput smul)
-  if [[ -t 2 ]] && [[ -z "${NO_COLOR-}" ]] && [[ "${TERM-}" != "dumb" ]]; then
+  if [[ ${NO_COLOR-} -ne 1 ]] && [[ -t 2 ]] && [[ -z "${NO_COLOR-}" ]] && [[ "${TERM-}" != "dumb" ]]; then
     # \033 or \e is the escape character and coupled with the '[' makes the prefix used to specify color, 0; indicates normal (not bold/etc.), then a color code (see wiki)
 
     NOFORMAT='\e[0m'
