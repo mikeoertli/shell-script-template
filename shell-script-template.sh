@@ -27,6 +27,8 @@ Script configuration:
     Disable colorized output
 -s, --silent
     Silent mode, no output (not recommended with dry-run mode)
+--test-colors
+    Print a message that shows the colors and exit, used for testing terminal color support.
 
 Available options:
 
@@ -57,21 +59,31 @@ setup_colors() {
   # BOLD_UL=$(tput bold)$(tput smul)
   if [[ ${NO_COLOR-} -ne 1 ]] && [[ -t 2 ]] && [[ -z "${NO_COLOR-}" ]] && [[ "${TERM-}" != "dumb" ]]; then
     # \033 or \e is the escape character and coupled with the '[' makes the prefix used to specify color, 0; indicates normal (not bold/etc.), then a color code (see wiki)
-
-    NOFORMAT='\e[0m'
-    BLUE='\e[0;94m'
-    RED='\e[0;31m'
-    YELLOW='\e[0;93m'
-    ORANGE='\e[0;33m'
-    PINK='\e[0;95m'
-    CYAN='\e[0;96m'
-    GREEN='\e[0;92m'
-    WHITE='\e[0;97m'
-    GRAY='\e[0;90m'
+    NOFORMAT='\033[0m'
+    BLUE='\033[34m'
+    RED='\033[31m'
+    YELLOW='\033[93m'
+    ORANGE='\033[33m'  # Some terminals may not support a distinct orange code
+    PINK='\033[95m'    # Not a standard code; using intense magenta
+    CYAN='\033[36m'
+    GREEN='\033[32m'
+    WHITE='\033[37m'
+    GRAY='\033[90m'
+    PURPLE='\033[35m'
   else
     # shellcheck disable=SC2034
-    NOFORMAT='' BLUE='' RED='' YELLOW='' ORANGE='' PINK='' CYAN='' GREEN='' WHITE='' GRAY=''
+    NOFORMAT='' BLUE='' RED='' YELLOW='' ORANGE='' PINK='' CYAN='' GREEN='' WHITE='' GRAY='' PURPLE=''
   fi
+}
+
+test_colors() {
+  msg "WITH COLORS:"
+  msg "  ${BLUE}BLUE${NOFORMAT} -- ${RED}RED${NOFORMAT} -- ${YELLOW}YELLOW${NOFORMAT} -- ${ORANGE}ORANGE${NOFORMAT} -- ${PINK}PINK${NOFORMAT} -- ${CYAN}CYAN${NOFORMAT} -- ${GREEN}GREEN${NOFORMAT} -- ${WHITE}WHITE${NOFORMAT} -- ${GRAY}GRAY${NOFORMAT} -- ${PURPLE}PURPLE${NOFORMAT}"
+  NO_COLOR=1
+  setup_colors
+  msg "WITHOUT COLORS:"
+  msg "  ${BLUE}BLUE${NOFORMAT} -- ${RED}RED${NOFORMAT} -- ${YELLOW}YELLOW${NOFORMAT} -- ${ORANGE}ORANGE${NOFORMAT} -- ${PINK}PINK${NOFORMAT} -- ${CYAN}CYAN${NOFORMAT} -- ${GREEN}GREEN${NOFORMAT} -- ${WHITE}WHITE${NOFORMAT} -- ${GRAY}GRAY${NOFORMAT} -- ${PURPLE}PURPLE${NOFORMAT}"
+  exit
 }
 
 # Set them up initially so they work, but the setup will be rerun when parsing the parameters.
@@ -134,6 +146,7 @@ parse_params() {
   while :; do
     case "${1-}" in
     -h|--help) usage ;;
+    --test-colors) test_colors ;;
     -d|--dry-run|--dryrun|--dry) DRY_RUN=1 ;;
     --debug) DEBUG=1 ;;
     -s|--silent) SILENT=1 ;;
