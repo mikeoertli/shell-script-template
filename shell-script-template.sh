@@ -111,7 +111,7 @@ is_debug_mode() {
 
 msg() {
   if is_not_silent_mode; then
-    # "In short: stdout is for output, stderr is for messaging."
+    # stdout is for output, stderr is for messaging (thus we use stderr for messaging)
     echo >&2 -e "${1-}"
   fi
 }
@@ -124,7 +124,7 @@ dbg() {
 
 die() {
   local msg=$1
-  local code=${2-1} # default exit status 1
+  local code=${2:-1} # default exit status 1
   if is_not_silent_mode; then
     msg "${RED}$msg${NOFORMAT}"
   fi
