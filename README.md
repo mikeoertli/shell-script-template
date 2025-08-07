@@ -17,7 +17,7 @@ or at least not to the detriment of any other platforms.
 
 Copy the `shell-script-template.sh` file into your new script:
 
-```
+```sh
 cp shell-script-template.sh my-new-script.sh
 ```
 
@@ -55,3 +55,7 @@ seems to have a nice concise outline of pros/cons of some common libraries. This
 repo also contains a useful overview of feature support for popular libraries.
 
 I am inclined to use [`bats-core`](https://github.com/bats-core/bats-core), but I suspect there are several good choices.
+
+## Future Ideas
+
+* Explore building in an example for [secure credential retrieval](https://scriptingosx.com/2021/04/get-password-from-keychain-in-shell-scripts/) (or create a second template script?).
