@@ -131,6 +131,12 @@ die() {
   exit "$code"
 }
 
+color_wrap() {
+  local VALUE=${1:?"String to be wrapped is required"}
+  
+  echo "${2:-$NOFORMAT}$VALUE${NOFORMAT}"
+}
+
 parse_params() {  
   # Do NOT use getopts, macOS version doesn't support long args
 
@@ -167,15 +173,16 @@ parse_params() {
     shift
   done
 
+  # The arguments passed after the parameters are saved to this array
   args=("$@")
 
   if is_debug_mode ; then
-    dbg "Debug mode enabled"
+    dbg "Debug mode enabled. There are ${#args[@]} script args."
   else
     msg "Not debug mode"
   fi
 
-  # TODO: perform validation here and/or remove the following:
+  # TODO: perform any appropriate validation here and/or remove the following:
   [[ -z "${param-}" ]] && die "Missing required parameter: param"
   [[ -z "${other-}" ]] && die "Missing required parameter: other"
   
