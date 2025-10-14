@@ -25,6 +25,8 @@ Script configuration:
     Dry run (only print what would be done, don't actually perform any operations)
 -n, --no-color
     Disable colorized output
+-b, --batch
+    Batch mode, runs without prompting the user for anything.
 -s, --silent
     Silent mode, no output (not recommended with dry-run mode)
 --test-colors
@@ -60,6 +62,7 @@ setup_colors() {
   if [[ ${NO_COLOR-} -ne 1 ]] && [[ -t 2 ]] && [[ -z "${NO_COLOR-}" ]] && [[ "${TERM-}" != "dumb" ]]; then
     # \033 or \e is the escape character and coupled with the '[' makes the prefix used to specify color, 0; indicates normal (not bold/etc.), then a color code (see wiki)
     NOFORMAT='\033[0m'
+    NORMAL='\033[0m'
     BLUE='\033[34m'
     RED='\033[31m'
     YELLOW='\033[93m'
@@ -72,7 +75,7 @@ setup_colors() {
     PURPLE='\033[35m'
   else
     # shellcheck disable=SC2034
-    NOFORMAT='' BLUE='' RED='' YELLOW='' ORANGE='' PINK='' CYAN='' GREEN='' WHITE='' GRAY='' PURPLE=''
+    NORMAL='' NOFORMAT='' BLUE='' RED='' YELLOW='' ORANGE='' PINK='' CYAN='' GREEN='' WHITE='' GRAY='' PURPLE=''
   fi
 }
 
@@ -107,6 +110,10 @@ is_not_silent_mode() {
 
 is_debug_mode() {
   is_not_silent_mode && [[ "${DEBUG-0}" -eq 1 ]]
+}
+
+is_batch_mode() {
+  [[ "${BATCH_MODE-0}" -eq 1 ]]
 }
 
 msg() {
@@ -147,6 +154,7 @@ parse_params() {
   DRY_RUN=0
   SILENT=0
   DEBUG=0
+  BATCH_MODE=0
 
   # TODO: update the argument parsing to match the options/parameters for this script (should always align with usage text)
   while :; do
@@ -155,6 +163,7 @@ parse_params() {
     --test-colors) test_colors ;;
     -d|--dry-run|--dryrun|--dry) DRY_RUN=1 ;;
     --debug) DEBUG=1 ;;
+    -b|--batch) BATCH_MODE=1 ;;
     -s|--silent) SILENT=1 ;;
     -v|--verbose) set -x ;;
     -n|--no-color) NO_COLOR=1 ;;
