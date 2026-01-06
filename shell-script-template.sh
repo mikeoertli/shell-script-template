@@ -5,7 +5,7 @@ set -Eeuo pipefail
 trap cleanup SIGINT SIGTERM ERR EXIT
 
 # shellcheck disable=SC2034
-readonly script_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd -P)
+readonly script_dir="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" &>/dev/null && pwd -P)"
 
 usage() {
   cat <<USAGE_TEXT
