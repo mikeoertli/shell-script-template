@@ -6,10 +6,11 @@ trap cleanup SIGINT SIGTERM ERR EXIT
 
 # shellcheck disable=SC2034
 readonly script_dir="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" &>/dev/null && pwd -P)"
+NO_COLOR=0
 
 usage() {
   cat <<USAGE_TEXT
-Usage: $(basename "${BASH_SOURCE[0]}") [-h] [-v] [-f] [-d] -p <value> [-o <value>] arg1 [arg2...]
+Usage: $(basename "${BASH_SOURCE[0]}") [-h] [-v] [-f] [-d] [-n] [-s] [--test-colors] -p <value> [-o <value>] arg1 [arg2...]
 
 TODO: Script description here (make sure to update parse_params accordingly).
 
@@ -30,7 +31,13 @@ Script configuration:
 -s, --silent
     Silent mode, no output (not recommended with dry-run mode)
 --test-colors
-    Print a message that shows the colors and exit, used for testing terminal color support.
+    Print a message that shows the status of colors being enabled as well as samples of the colors themselves, 
+    used for testing terminal color support.
+    Does not exit the script after running this test.
+--test-colors-and-exit
+    Print a message that shows the status of colors being enabled as well as samples of the colors themselves, 
+    used for testing terminal color support.
+    Exits the script after running this test.
 
 Available options:
 
@@ -59,7 +66,8 @@ setup_colors() {
   # DIM=$(tput sgr0 && tput dim)
   # UNDERLINE=$(tput smul)
   # BOLD_UL=$(tput bold)$(tput smul)
-  if [[ ${NO_COLOR-} -ne 1 ]] && [[ -t 2 ]] && [[ -z "${NO_COLOR-}" ]] && [[ "${TERM-}" != "dumb" ]]; then
+  # -t 2 checks if stderr is connected to an interactive terminal
+  if [[ ${NO_COLOR-0} -ne 1 ]] && [[ -t 2 ]] && [[ "${TERM-}" != "dumb" ]]; then
     # \033 or \e is the escape character and coupled with the '[' makes the prefix used to specify color, 0; indicates normal (not bold/etc.), then a color code (see wiki)
     NOFORMAT='\033[0m'
     NORMAL='\033[0m'
@@ -80,12 +88,27 @@ setup_colors() {
 }
 
 test_colors() {
+  local orig=$NO_COLOR
+  if [[ "${NO_COLOR-0}" -eq 0 ]]; then
+    msg "Colors are ENABLED! (NO_COLOR = $NO_COLOR)"
+  else
+    msg "Colors are DISABLED! (NO_COLOR = $NO_COLOR)"
+    NO_COLOR=0
+    setup_colors
+  fi
+  msg ""
   msg "WITH COLORS:"
   msg "  ${BLUE}BLUE${NOFORMAT} -- ${RED}RED${NOFORMAT} -- ${YELLOW}YELLOW${NOFORMAT} -- ${ORANGE}ORANGE${NOFORMAT} -- ${PINK}PINK${NOFORMAT} -- ${CYAN}CYAN${NOFORMAT} -- ${GREEN}GREEN${NOFORMAT} -- ${WHITE}WHITE${NOFORMAT} -- ${GRAY}GRAY${NOFORMAT} -- ${PURPLE}PURPLE${NOFORMAT}"
   NO_COLOR=1
   setup_colors
   msg "WITHOUT COLORS:"
   msg "  ${BLUE}BLUE${NOFORMAT} -- ${RED}RED${NOFORMAT} -- ${YELLOW}YELLOW${NOFORMAT} -- ${ORANGE}ORANGE${NOFORMAT} -- ${PINK}PINK${NOFORMAT} -- ${CYAN}CYAN${NOFORMAT} -- ${GREEN}GREEN${NOFORMAT} -- ${WHITE}WHITE${NOFORMAT} -- ${GRAY}GRAY${NOFORMAT} -- ${PURPLE}PURPLE${NOFORMAT}"
+  NO_COLOR=$orig
+  setup_colors
+}
+
+test_colors_and_exit() {
+  test_colors
   exit
 }
 
@@ -155,12 +178,14 @@ parse_params() {
   SILENT=0
   DEBUG=0
   BATCH_MODE=0
+  TEST_COLORS_MODE=0
 
   # TODO: update the argument parsing to match the options/parameters for this script (should always align with usage text)
   while :; do
     case "${1-}" in
     -h|--help) usage ;;
-    --test-colors) test_colors ;;
+    --test-colors) TEST_COLORS_MODE=1 ;;
+    --test-colors-and-exit) test_colors_and_exit ;;
     -d|--dry-run|--dryrun|--dry) DRY_RUN=1 ;;
     --debug) DEBUG=1 ;;
     -b|--batch) BATCH_MODE=1 ;;
@@ -202,6 +227,11 @@ parse_params() {
 }
 
 parse_params "${@}"
+
+if [[ "${TEST_COLORS_MODE-0}" -eq 1 ]]; then
+  test_colors
+fi
+
 setup_colors
 
 #  Print some info for debugging
