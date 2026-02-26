@@ -142,13 +142,13 @@ is_batch_mode() {
 msg() {
   if is_not_silent_mode; then
     # stdout is for output, stderr is for messaging (thus we use stderr for messaging)
-    echo >&2 -e "${1-}"
+    print -u2 -r -- "${1-}"   # <-- considered a safer version of 'echo >&2 -e "${1-}"', but note that it will print raw due to -r, so will not print newlines for \n
   fi
 }
 
 dbg() {
   if is_debug_mode; then
-    echo >&2 -e "${GRAY}${1-}${NOFORMAT}"
+    print -u2 -r -- "${GRAY}${1-}${NOFORMAT}" 
   fi
 }
 
