@@ -6,7 +6,6 @@ trap cleanup SIGINT SIGTERM ERR EXIT
 
 # shellcheck disable=SC2034
 readonly script_dir="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" &>/dev/null && pwd -P)"
-NO_COLOR=0
 
 usage() {
   cat <<USAGE_TEXT
@@ -56,6 +55,10 @@ cleanup() {
   # script cleanup here
 }
 
+is_color_enabled() {
+  [[ -z "${NO_COLOR-}" ]] && [[ -t 2 ]] && [[ -n "${TERM-}" && "${TERM-}" != "dumb" ]]
+}
+
 setup_colors() {
   # Typically uses bright color variants.
   # About terminal colors/format: https://unix.stackexchange.com/a/438357
@@ -67,20 +70,23 @@ setup_colors() {
   # UNDERLINE=$(tput smul)
   # BOLD_UL=$(tput bold)$(tput smul)
   # -t 2 checks if stderr is connected to an interactive terminal
-  if [[ ${NO_COLOR-0} -ne 1 ]] && [[ -t 2 ]] && [[ "${TERM-}" != "dumb" ]]; then
+  # Echo interprets ANSI codes for colors, but printf does not, so we must prefix the color codes with $'...' to enable interpretation
+  # of the ANSI codes when using printf (alternatively, we could use echo -e, but printf is generally safer and more consistent across platforms, 
+  # especially for complex strings and when using variables)
+  if is_color_enabled; then
     # \033 or \e is the escape character and coupled with the '[' makes the prefix used to specify color, 0; indicates normal (not bold/etc.), then a color code (see wiki)
-    NOFORMAT='\033[0m'
-    NORMAL='\033[0m'
-    BLUE='\033[34m'
-    RED='\033[31m'
-    YELLOW='\033[93m'
-    ORANGE='\033[33m'  # Some terminals may not support a distinct orange code
-    PINK='\033[95m'    # Not a standard code; using intense magenta
-    CYAN='\033[36m'
-    GREEN='\033[32m'
-    WHITE='\033[37m'
-    GRAY='\033[90m'
-    PURPLE='\033[35m'
+    NOFORMAT=$'\033[0m'
+    NORMAL=$'\033[0m'
+    BLUE=$'\033[34m'
+    RED=$'\033[31m'
+    YELLOW=$'\033[93m'
+    ORANGE=$'\033[33m'  # Some terminals may not support a distinct orange code
+    PINK=$'\033[95m'    # Not a standard code; using intense magenta
+    CYAN=$'\033[36m'
+    GREEN=$'\033[32m'
+    WHITE=$'\033[37m'
+    GRAY=$'\033[90m'
+    PURPLE=$'\033[35m'
   else
     # shellcheck disable=SC2034
     NORMAL='' NOFORMAT='' BLUE='' RED='' YELLOW='' ORANGE='' PINK='' CYAN='' GREEN='' WHITE='' GRAY='' PURPLE=''
@@ -88,12 +94,20 @@ setup_colors() {
 }
 
 test_colors() {
-  local orig=$NO_COLOR
-  if [[ "${NO_COLOR-0}" -eq 0 ]]; then
-    msg "Colors are ENABLED! (NO_COLOR = $NO_COLOR)"
+  local CLEAR_NO_COLOR
+  local NO_COLOR_ORIG
+  if [[ -z "${NO_COLOR-}" ]]; then
+    CLEAR_NO_COLOR=1
   else
-    msg "Colors are DISABLED! (NO_COLOR = $NO_COLOR)"
-    NO_COLOR=0
+    CLEAR_NO_COLOR=0
+    NO_COLOR_ORIG=$NO_COLOR
+  fi
+  
+  if is_color_enabled; then
+    msg "🎨 Colors are ENABLED! 🌈 (NO_COLOR = ${NO_COLOR:-"Not defined"})"
+  else
+    msg "⚪ Colors are DISABLED! ⚪ (NO_COLOR = ${NO_COLOR:-"Not defined"})"
+    unset NO_COLOR
     setup_colors
   fi
   msg ""
@@ -103,7 +117,12 @@ test_colors() {
   setup_colors
   msg "WITHOUT COLORS:"
   msg "  ${BLUE}BLUE${NOFORMAT} -- ${RED}RED${NOFORMAT} -- ${YELLOW}YELLOW${NOFORMAT} -- ${ORANGE}ORANGE${NOFORMAT} -- ${PINK}PINK${NOFORMAT} -- ${CYAN}CYAN${NOFORMAT} -- ${GREEN}GREEN${NOFORMAT} -- ${WHITE}WHITE${NOFORMAT} -- ${GRAY}GRAY${NOFORMAT} -- ${PURPLE}PURPLE${NOFORMAT}"
-  NO_COLOR=$orig
+  
+  if [[ $CLEAR_NO_COLOR -eq 1 ]]; then
+    unset NO_COLOR
+  else
+    NO_COLOR=$NO_COLOR_ORIG
+  fi
   setup_colors
 }
 
@@ -142,13 +161,13 @@ is_batch_mode() {
 msg() {
   if is_not_silent_mode; then
     # stdout is for output, stderr is for messaging (thus we use stderr for messaging)
-    printf '%s\n' "${1-}" >&2   # <-- considered a safer version of 'echo >&2 -e "${1-}"', but note that it will print raw due to -r, so will not print newlines for \n
+    printf '%s\n' "${*}" >&2   # <-- considered a safer version of 'echo >&2 -e "${1-}"', but note that it will print raw due to -r, so will not print newlines for \n
   fi
 }
 
 dbg() {
   if is_debug_mode; then
-    printf '%s\n' "${GRAY}${1-}${NOFORMAT}" >&2
+    printf '%s\n' "${GRAY}${*}${NOFORMAT}" >&2
   fi
 }
 
