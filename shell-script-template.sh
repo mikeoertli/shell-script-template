@@ -245,7 +245,11 @@ parse_params() {
   return 0
 }
 
-parse_params "${@}"
+if [[ $# -gt 0 ]]; then
+  parse_params "${@}"
+else
+  parse_params
+fi
 
 if [[ "${TEST_COLORS_MODE-0}" -eq 1 ]]; then
   test_colors
