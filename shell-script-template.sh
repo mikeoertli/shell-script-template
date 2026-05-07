@@ -172,10 +172,10 @@ dbg() {
 }
 
 die() {
-  local msg=$1
+  local text=$1
   local code=${2:-1} # default exit status 1
   if is_not_silent_mode; then
-    msg "${RED}$msg${NOFORMAT}"
+    msg "${RED}$text${NOFORMAT}"
   fi
   exit "$code"
 }
